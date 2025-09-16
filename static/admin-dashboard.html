@@ -1,0 +1,486 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Admin Dashboard - Jubilant Land Hotel</title>
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <style>
+        :root {
+            --primary: #d35400;
+            --secondary: #e67e22;
+            --light: #f8f9fa;
+            --dark: #343a40;
+            --success: #28a745;
+            --warning: #ffc107;
+            --danger: #dc3545;
+        }
+        body {
+            background-color: #f5f5f5;
+            font-family: 'Roboto', sans-serif;
+        }
+        .sidebar {
+            background: var(--dark);
+            color: white;
+            height: 100vh;
+            position: fixed;
+            padding-top: 20px;
+            width: 250px;
+        }
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 15px 20px;
+            border-left: 4px solid transparent;
+        }
+        .sidebar .nav-link:hover {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+        }
+        .sidebar .nav-link.active {
+            color: white;
+            background: rgba(255, 255, 255, 0.1);
+            border-left: 4px solid var(--primary);
+        }
+        .main-content {
+            margin-left: 250px;
+            padding: 20px;
+        }
+        .dashboard-card {
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+            padding: 20px;
+            margin-bottom: 20px;
+        }
+        .status-badge {
+            padding: 5px 10px;
+            border-radius: 20px;
+            font-size: 12px;
+            font-weight: 600;
+        }
+        .status-pending {
+            background: #fff3cd;
+            color: #856404;
+        }
+        .status-approved {
+            background: #d4edda;
+            color: #155724;
+        }
+        .status-rejected {
+            background: #f8d7da;
+            color: #721c24;
+        }
+        .btn-primary {
+            background: var(--primary);
+            border-color: var(--primary);
+        }
+        .btn-primary:hover {
+            background: var(--secondary);
+            border-color: var(--secondary);
+        }
+        .table th {
+            border-top: none;
+            font-weight: 600;
+            color: var(--dark);
+        }
+        .notification-badge {
+            position: absolute;
+            top: 5px;
+            right: 5px;
+            background: var(--primary);
+            color: white;
+            border-radius: 50%;
+            width: 20px;
+            height: 20px;
+            font-size: 12px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .stats-card {
+            text-align: center;
+            padding: 20px;
+            border-radius: 10px;
+            color: white;
+        }
+        .stats-card.primary {
+            background: linear-gradient(to right, var(--primary), var(--secondary));
+        }
+        .stats-card.success {
+            background: linear-gradient(to right, var(--success), #20c997);
+        }
+        .stats-card.warning {
+            background: linear-gradient(to right, var(--warning), #fd7e14);
+        }
+        .stats-card i {
+            font-size: 2.5rem;
+            margin-bottom: 10px;
+        }
+        .stats-card h3 {
+            font-size: 2rem;
+            margin-bottom: 0;
+        }
+        .stats-card p {
+            margin-bottom: 0;
+            opacity: 0.9;
+        }
+        .loader {
+            border: 5px solid #f3f3f3;
+            border-radius: 50%;
+            border-top: 5px solid var(--primary);
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 20px auto;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <div class="col-md-2 sidebar d-none d-md-block">
+                <div class="text-center mb-4">
+                    <h4>Jubilant Hotel Admin</h4>
+                    <hr class="bg-light">
+                </div>
+                <ul class="nav flex-column">
+                    <li class="nav-item">
+                        <a class="nav-link active" href="#" id="dashboard-tab">
+                            <i class="fas fa-tachometer-alt me-2"></i> Dashboard
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="reviews-tab">
+                            <i class="fas fa-star me-2"></i> Reviews
+                            <span class="notification-badge" id="review-count">0</span>
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="payments-tab">
+                            <i class="fas fa-credit-card me-2"></i> Payments
+                        </a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="#" id="logout-btn">
+                            <i class="fas fa-sign-out-alt me-2"></i> Logout
+                        </a>
+                    </li>
+                </ul>
+            </div>
+
+            <!-- Main Content -->
+            <div class="col-md-10 main-content">
+                <h2 class="mb-4">Admin Dashboard</h2>
+                
+                <!-- Stats Cards -->
+                <div class="row mb-4" id="stats-cards">
+                    <div class="col-md-3">
+                        <div class="stats-card primary">
+                            <i class="fas fa-users"></i>
+                            <h3 id="total-guests">0</h3>
+                            <p>Total Guests</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card success">
+                            <i class="fas fa-bed"></i>
+                            <h3 id="occupied-rooms">0</h3>
+                            <p>Occupied Rooms</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card warning">
+                            <i class="fas fa-star"></i>
+                            <h3 id="total-reviews">0</h3>
+                            <p>Total Reviews</p>
+                        </div>
+                    </div>
+                    <div class="col-md-3">
+                        <div class="stats-card" style="background: linear-gradient(to right, #6f42c1, #d63384);">
+                            <i class="fas fa-money-bill-wave"></i>
+                            <h3>₦<span id="total-revenue">0</span></h3>
+                            <p>Total Revenue</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Reviews Section -->
+                <div class="dashboard-card mt-4" id="reviews-section">
+                    <h4 class="mb-4"><i class="fas fa-star me-2"></i> Pending Reviews</h4>
+                    <div id="reviews-loader" class="loader" style="display: none;"></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Name</th>
+                                    <th>Email</th>
+                                    <th>Message</th>
+                                    <th>Date</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="reviews-table">
+                                <!-- Reviews will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                
+                <!-- Payments Section -->
+                <div class="dashboard-card mt-4" id="payments-section" style="display: none;">
+                    <h4 class="mb-4"><i class="fas fa-credit-card me-2"></i> Payment Management</h4>
+                    <div id="payments-loader" class="loader" style="display: none;"></div>
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Customer</th>
+                                    <th>Email</th>
+                                    <th>Amount</th>
+                                    <th>Reference</th>
+                                    <th>Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody id="payments-table">
+                                <!-- Payments will be populated here -->
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script>
+        // Check if user is logged in
+        const isLoggedIn = localStorage.getItem('adminLoggedIn');
+        if (!isLoggedIn) {
+            window.location.href = 'admin-login.html';
+        }
+
+        // API Base URL
+        const API_BASE = 'http://localhost:5000'; // Change this to your backend URL
+
+        // Tab switching
+        document.getElementById('dashboard-tab').addEventListener('click', () => {
+            showDashboard();
+        });
+
+        document.getElementById('reviews-tab').addEventListener('click', () => {
+            showReviews();
+        });
+
+        document.getElementById('payments-tab').addEventListener('click', () => {
+            showPayments();
+        });
+
+        // Logout functionality
+        document.getElementById('logout-btn').addEventListener('click', function() {
+            localStorage.removeItem('adminLoggedIn');
+            window.location.href = 'admin-login.html';
+        });
+
+        // Load data when page is ready
+        document.addEventListener('DOMContentLoaded', function() {
+            loadDashboardData();
+            loadReviews();
+        });
+
+        // Show dashboard section
+        function showDashboard() {
+            document.getElementById('reviews-section').style.display = 'none';
+            document.getElementById('payments-section').style.display = 'none';
+            document.getElementById('stats-cards').style.display = 'flex';
+            document.getElementById('dashboard-tab').classList.add('active');
+            document.getElementById('reviews-tab').classList.remove('active');
+            document.getElementById('payments-tab').classList.remove('active');
+        }
+
+        // Show reviews section
+        function showReviews() {
+            document.getElementById('reviews-section').style.display = 'block';
+            document.getElementById('payments-section').style.display = 'none';
+            document.getElementById('stats-cards').style.display = 'none';
+            document.getElementById('dashboard-tab').classList.remove('active');
+            document.getElementById('reviews-tab').classList.add('active');
+            document.getElementById('payments-tab').classList.remove('active');
+            loadReviews();
+        }
+
+        // Show payments section
+        function showPayments() {
+            document.getElementById('reviews-section').style.display = 'none';
+            document.getElementById('payments-section').style.display = 'block';
+            document.getElementById('stats-cards').style.display = 'none';
+            document.getElementById('dashboard-tab').classList.remove('active');
+            document.getElementById('reviews-tab').classList.remove('active');
+            document.getElementById('payments-tab').classList.add('active');
+            loadPayments();
+        }
+
+        // Load dashboard statistics
+        async function loadDashboardData() {
+            try {
+                const response = await fetch(${API_BASE}/api/admin/stats);
+                const data = await response.json();
+                
+                if (data.success) {
+                    document.getElementById('total-guests').textContent = data.totalGuests;
+                    document.getElementById('occupied-rooms').textContent = data.occupiedRooms;
+                    document.getElementById('total-reviews').textContent = data.totalReviews;
+                    document.getElementById('total-revenue').textContent = data.totalRevenue.toLocaleString();
+                }
+            } catch (error) {
+                console.error('Error loading dashboard data:', error);
+            }
+        }
+
+        // Load reviews from server
+        async function loadReviews() {
+            const reviewsLoader = document.getElementById('reviews-loader');
+            reviewsLoader.style.display = 'block';
+            
+            try {
+                const response = await fetch(${API_BASE}/api/admin/reviews);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const reviews = data.reviews;
+                    
+                    // Update notification badge
+                    document.getElementById('review-count').textContent = reviews.filter(r => !r.approved).length;
+                    
+                    // Populate reviews table
+                    const reviewsTable = document.getElementById('reviews-table');
+                    reviewsTable.innerHTML = '';
+                    
+                    reviews.forEach(review => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${review.name}</td>
+                            <td>${review.email}</td>
+                            <td>${review.message}</td>
+                            <td>${new Date(review.created_at).toLocaleDateString()}</td>
+                            <td>
+                                ${!review.approved ? `
+                                <button class="btn btn-sm btn-success me-2" onclick="approveReview('${review._id}')">
+                                    <i class="fas fa-check"></i> Approve
+                                </button>
+                                ` : ''}
+                                <button class="btn btn-sm btn-danger" onclick="deleteReview('${review._id}')">
+                                    <i class="fas fa-trash"></i> Delete
+                                </button>
+                            </td>
+                        `;
+                        reviewsTable.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading reviews:', error);
+                alert('Failed to load reviews. Please check your connection.');
+            } finally {
+                reviewsLoader.style.display = 'none';
+            }
+        }
+
+        // Load payments from server
+        async function loadPayments() {
+            const paymentsLoader = document.getElementById('payments-loader');
+            paymentsLoader.style.display = 'block';
+            
+            try {
+                const response = await fetch(${API_BASE}/api/admin/payments);
+                const data = await response.json();
+                
+                if (data.success) {
+                    const payments = data.payments;
+                    const paymentsTable = document.getElementById('payments-table');
+                    paymentsTable.innerHTML = '';
+                    
+                    payments.forEach(payment => {
+                        const row = document.createElement('tr');
+                        row.innerHTML = `
+                            <td>${payment.customer_name}</td>
+                            <td>${payment.customer_email}</td>
+                            <td>₦${parseInt(payment.amount).toLocaleString()}</td>
+                            <td>${payment.reference}</td>
+                            <td>${new Date(payment.created_at).toLocaleDateString()}</td>
+                            <td>
+                                <span class="status-badge status-${payment.status}">
+                                    ${payment.status}
+                                </span>
+                            </td>
+                            <td>
+                                <select class="form-select form-select-sm" onchange="updatePaymentStatus('${payment._id}', this.value)">
+                                    <option value="pending" ${payment.status === 'pending' ? 'selected' : ''}>Pending</option>
+                                    <option value="approved" ${payment.status === 'approved' ? 'selected' : ''}>Approved</option>
+                                    <option value="rejected" ${payment.status === 'rejected' ? 'selected' : ''}>Rejected</option>
+                                </select>
+                            </td>
+                        `;
+                        paymentsTable.appendChild(row);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading payments:', error);
+                alert('Failed to load payments. Please check your connection.');
+            } finally {
+                paymentsLoader.style.display = 'none';
+            }
+        }
+
+        // Approve a review
+        async function approveReview(reviewId) {
+            try {
+                const response = await fetch(${API_BASE}/api/admin/reviews/${reviewId}/approve, {
+                    method: 'POST'
+                });
+                const data = await response.json();
+                
+                if (data.success) {
+                    alert('Review approved successfully');
+                    loadReviews(); // Reload the reviews
+                } else {
+                    alert('Error: ' + data.message);
+                }
+            } catch (error) {
+                console.error('Error approving review:', error);
+                alert('Failed to approve review. Please check your connection.');
+            }
+        }
+
+        // Delete a review
+        async function deleteReview(reviewId) {
+            if (confirm('Are you sure you want to delete this review?')) {
+                try {
+                    const response = await fetch(${API_BASE}/api/admin/reviews/${reviewId}, {
+                        method: 'DELETE'
+                    });
+                    const data = await response.json();
+                    
+                    if (data.success) {
+                        alert('Review deleted successfully');
+                        loadReviews(); // Reload the reviews
+                    } else {
+                        alert('Error: ' + data.message);
+                    }
+                } catch (error) {
+                    console.error('Error deleting review:', error);
+                    alert('Failed to delete review. Please check your connection.');
+                }
+            }
+        }
+
+        // Update payment status
+        async function updatePaymentStatus(paymentId, status) {
+            try {
+                const response = await fetch(${API_BASE}/api/admin/payments/${paymentId},

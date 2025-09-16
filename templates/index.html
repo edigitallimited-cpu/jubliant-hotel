@@ -1,0 +1,75 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <title>Jubilant Land Hotel</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <link rel="stylesheet" href="{{ url_for('static', filename='css/style.css') }}">
+  <style>
+    /* small fallback */
+    body{font-family:Inter,Arial,sans-serif;background:#f7f8fb;color:#222;margin:0}
+    .wrap{max-width:1100px;margin:0 auto;padding:28px}
+    .card{background:#fff;padding:18px;border-radius:8px;box-shadow:0 6px 20px rgba(12,15,30,0.04);margin-bottom:18px}
+    input,textarea,select{width:100%;padding:10px;margin-bottom:10px;border:1px solid #e5e7eb;border-radius:6px}
+    button{background:#0b74da;color:#fff;padding:10px;border-radius:8px;border:0;cursor:pointer}
+  </style>
+</head>
+<body>
+  <div class="wrap">
+    <header style="display:flex;justify-content:space-between;align-items:center;margin-bottom:14px">
+      <div><strong>Jubilant Land Hotel</strong></div>
+      <nav><a href="/">Home</a> | <a href="/rooms">Rooms</a> | <a href="/events">Events</a></nav>
+    </header>
+
+    <div class="card">
+      <h2>Book a room</h2>
+      <form action="/book" method="POST" id="bookingForm">
+        <input name="name" placeholder="Full name" required>
+        <input name="email" type="email" placeholder="Email" required>
+        <input name="phone" placeholder="Phone" required>
+        <select name="room" required>
+          <option value="Diamond">Diamond — ₦20,000</option>
+          <option value="Gold">Gold — ₦40,000</option>
+        </select>
+        <div style="display:flex;gap:8px">
+          <input name="checkin" type="date" required style="flex:1">
+          <input name="checkout" type="date" required style="flex:1">
+        </div>
+        <button type="submit">Book Now</button>
+        <p style="margin-top:10px;color:#555">After booking, send payment to: <strong>{{ payment['name'] }} — {{ payment['account'] }}</strong></p>
+      </form>
+    </div>
+
+    <div class="card">
+      <h2>Share your experience</h2>
+      <form action="/review" method="POST" id="reviewForm">
+        <input name="name" placeholder="Your name" required>
+        <input name="email" type="email" placeholder="Email" required>
+        <textarea name="comment" rows="4" placeholder="Tell us about your stay" required></textarea>
+        <button type="submit">Submit Review</button>
+      </form>
+    </div>
+
+    <div class="card">
+      <h3>What Our Guests Say</h3>
+      <div id="reviewsList">
+        {% if reviews %}
+          {% for r in reviews %}
+            <div style="padding:10px;border-left:4px solid #eee;margin-bottom:10px">
+              <strong>{{ r.name }}</strong> <small style="color:#777"> - {{ r.created_at }}</small>
+              <p>{{ r.comment }}</p>
+            </div>
+          {% endfor %}
+        {% else %}
+          <p>No reviews yet.</p>
+        {% endif %}
+      </div>
+    </div>
+
+    <footer style="text-align:center;padding:18px;color:#777">
+      <a href="/admin" style="font-size:11px;color:#999;text-decoration:none">Admin</a>
+      <div>&copy; Jubilant Land Hotel</div>
+    </footer>
+  </div>
+</body>
+</html>
