@@ -1,0 +1,20 @@
+app.js: This is the entry point of your application. It sets up the Express.js server and initializes the routes and controllers.
+
+routes/: This directory contains separate files for different routes. For example,
+bookingRoutes.js and reviewRoutes.js define the routes related to bookings and reviews, respectively.
+
+controllers/: This directory contains separate files for different controllers.
+For example, bookingController.js and reviewController.js handle the logic for booking-related and review-related requests, respectively.
+
+models/: This directory contains separate files for different models.
+For example, bookingModel.js and reviewModel.js define the schema and methods for the
+booking and review collections in your MongoDB database.
+
+utils/: This directory contains utility files. For example, database.js can handle
+the connection to the MongoDB database.
+
+package.json: This file contains the project dependencies and scripts.
+
+*********
+Make sure to install the required dependencies by running
+npm install express body-parser mongodb in your project directory
